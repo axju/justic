@@ -4,15 +4,15 @@ pipeline {
         stage('setup') {
             steps {
                 withEnv(["HOME=${env.WORKSPACE}"]) {
-                    sh "pip install --user --upgrade pip"
-                    sh "pip install --user ."
+                    sh "pip install --upgrade pip wheel"
+                    sh "pip install ."
                 }
             }
         }
         stage('test - coverage') {
             steps {
                 withEnv(["HOME=${env.WORKSPACE}"]) {
-                    sh "pip install --user --upgrade coverage pytest"
+                    sh "pip install --upgrade coverage pytest"
                     sh "python -m coverage run --branch --source justic -m pytest --junitxml junittest-coverage.xml"
                     sh "python -m coverage xml"
                 }
@@ -30,6 +30,25 @@ pipeline {
             steps {
                 withEnv(["HOME=${env.WORKSPACE}"]) {
                     sh "python setup.py sdist bdist_wheel"
+                    sh "python -m twine check dist/*"
+                }
+            }
+        }
+        stage('publish') {
+            steps {
+                script {
+                    PYPI_VERSION = sh (
+                        script: 'python setup.py --version',
+                        returnStdout: true
+                    ).trim()
+                    echo "PyPi Version: ${PYPI_VERSION}"
+                    if (PYPI_VERSION.length() < 8){
+                        echo "publish on PyPi"
+                        withEnv(["HOME=${env.WORKSPACE}"]) {
+                            sh "pip install --upgrade twine"
+                            sh "python -m twine upload dist/*"
+                        }
+                    }
                 }
             }
         }
