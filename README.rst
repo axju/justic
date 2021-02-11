@@ -59,4 +59,4 @@ Create package::
   python -m pip install --upgrade twine
   python setup.py sdist bdist_wheel
   twine check dist/*
-  twine upload dist/*
+  python -m twine upload dist/*

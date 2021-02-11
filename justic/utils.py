@@ -56,12 +56,14 @@ class Justic:
             self.logger.debug('content %s', content)
 
     def copy_static(self):
-        shutil.rmtree(self.directories['build'] / 'static')
-        shutil.copytree(self.directories['static'], self.directories['build'] / 'static')
+        staticbuild = self.directories['build'] / 'static'
+        if staticbuild.is_dir():
+            shutil.rmtree(staticbuild)
+        shutil.copytree(self.directories['static'], staticbuild)
 
     def run(self):
         self.logger.info('run')
-        if self.kwargs.get('delete', False):
+        if self.kwargs.get('delete', False) and self.directories['build'].is_dir():
             shutil.rmtree(self.directories['build'])
         sys.path.append(str(self.directories['work']))
         self.directories['build'].mkdir(parents=True, exist_ok=True)
