@@ -116,3 +116,4 @@ GitHub.sublime-settings
 .history
 
 example/build
+tests/test_project/build
