@@ -4,7 +4,7 @@ pipeline {
         stage('setup') {
             steps {
                 withEnv(["HOME=${env.WORKSPACE}"]) {
-                    sh "pip install --upgrade pip wheel"
+                    sh "pip install --upgrade pip wheel twine"
                     sh "pip install ."
                 }
             }
@@ -45,7 +45,6 @@ pipeline {
                     if (PYPI_VERSION.length() < 8){
                         echo "publish on PyPi"
                         withEnv(["HOME=${env.WORKSPACE}"]) {
-                            sh "pip install --upgrade twine"
                             sh "python -m twine upload dist/*"
                         }
                     }
