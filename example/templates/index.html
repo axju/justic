@@ -1,11 +1,11 @@
 {% extends "base.html" %}
 
-{% block title %}{{title}}{% endblock %}
+{% block title %}{{TITLE}}{% endblock %}
 
 {% block content %}
-<h1>{{title}}</h1>
+<h1>{{TITLE}}</h1>
 <hr>
-{% for item in content_list %}
+{% for item in CONTENT %}
 <p>{{item}}</p>
 {% endfor %}
 {% endblock %}

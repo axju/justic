@@ -1,7 +1,9 @@
 from lorem_text import lorem
 
-template = 'index.html'
+META = {
+    'template': 'index.html'
+}
 
-title = 'Lorem Example'
+TITLE = 'Lorem Example'
 
-content_list = [item for item in lorem.paragraphs(200).split('\n') if len(item) > 4]
+CONTENT = [item for item in lorem.paragraphs(200).split('\n') if len(item) > 4]

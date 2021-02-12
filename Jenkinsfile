@@ -51,11 +51,10 @@ pipeline {
                     echo "PyPi version: ${PYPI_VERSION}"
                     if (PYPI_VERSION.length() < 8){
                         echo "Publish on PyPi"
-                        withEnv(["HOME=${env.WORKSPACE}"]) {
-                            sh """#!/bin/bash
+                        sh """#!/bin/bash
+                            source venv/bin/activate
                             python -m twine upload dist/*
                         """
-                        }
                     }
                     else{
                         echo "Skip upload to PyPi"

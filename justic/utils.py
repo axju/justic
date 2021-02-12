@@ -12,7 +12,7 @@ def check_file(file):
     data = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(data)
     content = {name: getattr(data, name) for name in dir(data) if not name.startswith('__')}
-    return getattr(data, 'template', None), content
+    return content.get('META', {}), content
 
 
 class Directories(dict):
@@ -45,10 +45,10 @@ class Justic:
 
     def render(self):
         tmpenv = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=self.directories['templates']))
-        default_tempalte, global_content = self.load_global()
+        default_meta, global_content = self.load_global()
         for file in self.directories['content'].glob('**/*.py'):
-            template_name, content = check_file(file)
-            template = tmpenv.get_template(template_name or default_tempalte)
+            meta, content = check_file(file)
+            template = tmpenv.get_template(meta.get('template') or default_meta.get('template', 'base.html'))
             content.update(global_content)
             data = template.render(**content)
             self.get_outputfile(file).write_text(data)
