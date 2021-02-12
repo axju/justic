@@ -40,8 +40,11 @@ class Justic:
             return check_file(self.config)
         return 'base.html', {}
 
-    def get_outputfile(self, file):
-        return self.directories['build'] / file.relative_to(self.directories['content']).with_suffix('.html')
+    def write_outputfile(self, file, data):
+        output_file = self.directories['build'] / file.relative_to(self.directories['content']).with_suffix('.html')
+        output_file.parent.mkdir(parents=True, exist_ok=True)
+        output_file.write_text(data)
+        self.logger.info('create file %s', output_file)
 
     def render(self):
         tmpenv = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=self.directories['templates']))
@@ -50,10 +53,9 @@ class Justic:
             meta, content = check_file(file)
             template = tmpenv.get_template(meta.get('template') or default_meta.get('template', 'base.html'))
             content.update(global_content)
-            data = template.render(**content)
-            self.get_outputfile(file).write_text(data)
-            self.logger.info('create file %s', self.get_outputfile(file))
             self.logger.debug('content %s', content)
+            data = template.render(**content)
+            self.write_outputfile(file, data)
 
     def copy_static(self):
         staticbuild = self.directories['build'] / 'static'
