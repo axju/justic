@@ -1,52 +1,64 @@
 pipeline {
-    agent { docker { image 'python:3.8' } }
+    agent { docker { image 'python:3' } }
     stages {
         stage('setup') {
             steps {
-                withEnv(["HOME=${env.WORKSPACE}"]) {
-                    sh "pip install --upgrade pip wheel twine"
-                    sh "pip install ."
-                }
+                sh """#!/bin/bash
+                    python3 -m venv venv
+                    source venv/bin/activate
+                    pip install --no-cache --upgrade pip wheel setuptools twine
+                    pip install --no-cache -e .
+                """
             }
         }
-        stage('test - coverage') {
+        stage('coverage') {
             steps {
-                withEnv(["HOME=${env.WORKSPACE}"]) {
-                    sh "pip install --upgrade coverage pytest"
-                    sh "python -m coverage run --branch --source justic -m pytest --junitxml junittest-coverage.xml"
-                    sh "python -m coverage xml"
-                }
+                sh """#!/bin/bash
+                    source venv/bin/activate
+                    python -m pip install --no-cache --upgrade coverage pytest
+                    python -m coverage run --branch --source justic -m pytest --disable-pytest-warnings --junitxml junittest-coverage.xml
+                    python -m coverage xml
+                """
             }
         }
-        stage('test - pylint') {
+        stage('pylint') {
             steps {
-                withEnv(["HOME=${env.WORKSPACE}"]) {
-                    sh "python -m pip install pylint pylint_junit"
-                    sh "python -m pylint --rcfile=setup.cfg --output-format=pylint_junit.JUnitReporter justic | tee junittest-pylint.xml"
-                }
+                sh """#!/bin/bash
+                    source venv/bin/activate
+                    python -m pip install --no-cache --upgrade pylint pylint_junit
+                    python -m pylint --rcfile=setup.cfg --output-format=pylint_junit.JUnitReporter justic | tee junittest-pylint.xml
+                """
             }
         }
         stage('build') {
             steps {
-                withEnv(["HOME=${env.WORKSPACE}"]) {
-                    sh "python setup.py sdist bdist_wheel"
-                    sh "python -m twine check dist/*"
-                }
+                sh """#!/bin/bash
+                    source venv/bin/activate
+                    python setup.py sdist bdist_wheel
+                """
             }
         }
         stage('publish') {
             steps {
                 script {
                     PYPI_VERSION = sh (
-                        script: 'python setup.py --version',
+                        script: """#!/bin/bash
+                            source venv/bin/activate
+                            python setup.py --version
+                        """,
                         returnStdout: true
                     ).trim()
-                    echo "PyPi Version: ${PYPI_VERSION}"
+                    echo "PyPi version: ${PYPI_VERSION}"
                     if (PYPI_VERSION.length() < 8){
-                        echo "publish on PyPi"
+                        echo "Publish on PyPi"
                         withEnv(["HOME=${env.WORKSPACE}"]) {
-                            sh "python -m twine upload dist/*"
+                            sh """#!/bin/bash
+                            python -m twine upload dist/*
+                        """
                         }
+                    }
+                    else{
+                        echo "Skip upload to PyPi"
                     }
                 }
             }
