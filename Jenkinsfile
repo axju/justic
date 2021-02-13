@@ -39,6 +39,9 @@ pipeline {
             }
         }
         stage('publish') {
+            when {
+                branch 'master'
+            }
             steps {
                 script {
                     PYPI_VERSION = sh (
