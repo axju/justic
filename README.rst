@@ -23,6 +23,41 @@ Example
   python -m justic example
   python -m http.server --directory example/build
 
+
+Content files
+-------------
+The content are simple python files with a specific structure. There are three
+important sections:
+
+JUSTIC (__JUSTIC__)
+  For settings for the Justic class. This will be inherited to the sub
+  directory.
+
+META (__META__)
+  Parameters for the current instance, like the template name or build file.
+
+OTHERS
+  All other capitalized variable will be passed to the template.
+
+All Parameters:
+
+.. code-block:: python
+
+  __JUSTIC__ = {
+    'remove_build_prefix': 'content',
+    'default_template': 'index.html',
+  }
+
+  __META__ = {
+    'target': 'content',
+    'targets': ['content'],
+    'static': 'static',
+    'template': 'foo.html',
+  }
+
+  TITLE = 'Foo'
+  SITEURL = ''
+
 Development
 -----------
 Virtual environment windows::
@@ -60,3 +95,8 @@ Create package::
   python setup.py sdist bdist_wheel
   python -m twine check dist/*
   python -m twine upload dist/*
+
+ToDo
+----
+
+1. copy static don't work for sub directory

@@ -1,7 +1,6 @@
 from pkg_resources import get_distribution, DistributionNotFound
 from justic.utils import Justic
 
-
 __all__ = ['Justic']
 
 try:

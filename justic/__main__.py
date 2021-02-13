@@ -21,7 +21,7 @@ def main(argv=None):
 
     args = parser.parse_args(argv)
     set_logger(args.verbose)
-    justic = Justic(**vars(args))
+    justic = Justic(root=args.workdir, target=args.config)
     justic.run()
 
 
