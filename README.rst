@@ -86,10 +86,15 @@ Run test for multiple python versions::
 
 Check syntax::
 
-  flake8 justic
-  pylint --rcfile=setup.cfg justic
+  python -m flake8 justic
+  python -m pylint --rcfile=setup.cfg justic
 
-Create package::
+Create package Jenkins will do it::
+
+  git tag -a 0.1.7 -m "version 0.1.7"
+  git push --follow-tags
+
+No Jenkins?::
 
   python -m pip install --upgrade twine
   python setup.py sdist bdist_wheel
@@ -100,3 +105,4 @@ ToDo
 ----
 
 1. copy static don't work for sub directory
+2. improve test
