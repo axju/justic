@@ -46,6 +46,14 @@ All Parameters:
   __JUSTIC__ = {
     'remove_build_prefix': 'content',
     'default_template': 'index.html',
+    'dirs': {
+      'root': '.',
+      'build': 'build',
+      'templates': 'templates',
+    }
+    'funcs': {
+      ...
+    }
   }
 
   __META__ = {
@@ -53,10 +61,16 @@ All Parameters:
     'targets': ['content'],
     'static': 'static',
     'template': 'foo.html',
+    'current': ''
+    'render': True,
+    'build': ...
   }
 
   TITLE = 'Foo'
   SITEURL = ''
+  CONTENT = {
+    ...
+  }
 
 Development
 -----------

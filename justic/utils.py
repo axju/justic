@@ -8,18 +8,50 @@ import jinja2
 logger = logging.getLogger(__name__)
 
 
-def defaults(root, target):
+def defaults(root, target, config):
     """return config, content, meta"""
     dirs = {'root': pathlib.Path(root).absolute()}
     dirs['build'] = dirs['root'] / 'build'
     dirs['templates'] = dirs['root'] / 'templates'
+    funcs = {
+        'default': defaults,
+        'analyze_current': analyze_current,
+    }
+    config.get('dirs', {}).update(dirs)
+    config.get('funcs', {}).update(funcs)
 
-    config = {'dirs': dirs}
     meta = {'current': pathlib.Path(target)}
     if not meta['current'].is_absolute():
         meta['current'] = dirs['root'] / meta['current']
 
     return config, {}, meta
+
+
+def update_config(config, meta):
+    result = config if isinstance(config, dict) else {}
+    meta = meta if isinstance(meta, dict) else {}
+    result['remove_build_prefix'] = config.get('remove_build_prefix', '.')
+    for directory in meta.get('dirs', {}).values():
+        if not isinstance(directory, pathlib.Path):
+            directory = pathlib.Path(directory)
+        if not directory.is_absolute():
+            directory = result.get('dirs', {})['root'] / directory
+    return result
+
+
+def update_meta(config, meta):
+    result = meta if isinstance(meta, dict) else {}
+    config = config if isinstance(config, dict) else {}
+    result['render'] = meta.get('render', True) and meta.get('current').is_file()
+    result['template'] = meta.get('template') or config.get('default_template')
+    result['build'] = meta.get('build')
+    if isinstance(meta['build'], str):
+        result['build'] = config['dirs']['build'] / pathlib.Path(meta['build'])
+    else:
+        output = result['current'].relative_to(config['dirs']['root'] / config['remove_build_prefix'])
+        result['build'] = config['dirs']['build'] / output
+        result['build'] = result['build'].with_suffix('.html')
+    return result
 
 
 def load_file(file):
@@ -68,15 +100,15 @@ def get_targets(config, content, meta):
 
 
 def render(config, content, meta):
-    print(config['dirs'])
     if not meta.get('render', True) or not isinstance(meta.get('template'), str):
-        logger.info('nothing to render')
+        logger.debug('nothing to render')
         return
     tmpenv = jinja2.Environment(loader=jinja2.FileSystemLoader(searchpath=config['dirs']['templates']))
     template = tmpenv.get_template(meta['template'])
     data = template.render(**content)
     meta['build'].parent.mkdir(parents=True, exist_ok=True)
     meta['build'].write_text(data)
+    logger.info('save file "%s"', meta['build'])
 
 
 def copy_static(config, meta):
